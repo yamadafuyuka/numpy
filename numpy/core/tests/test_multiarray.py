@@ -9834,7 +9834,14 @@ class TestViewDtype:
                     [[2312, 2826], [5396, 5910]]]
         assert_array_equal(x.view('<i2'), expected)
 
+def check_support_sve():
+    import subprocess
+    cmd = 'lscpu'
+    process = (subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                            shell=True).communicate()[0]).decode('utf-8')
+    return "sve" in process
 
+@pytest.mark.skipif(check_support_sve, reason="gh-22982")
 # Test various array sizes that hit different code paths in quicksort-avx512
 @pytest.mark.parametrize("N", [8, 16, 24, 32, 48, 64, 96, 128, 151, 191,
                                256, 383, 512, 1023, 2047])

@@ -109,8 +109,15 @@ def test_array_scalar_ufunc_equivalence(op, arr1, arr2):
             scalar_res = op(scalar1, scalar2)
             assert_array_equal(scalar_res, res)
 
+def check_support_sve():
+    import subprocess
+    cmd = 'lscpu'
+    process = (subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                            shell=True).communicate()[0]).decode('utf-8')
+    return "sve" in process
 
 class TestBaseMath:
+    @pytest.mark.skipif(check_support_sve, reason="gh-22982")
     def test_blocked(self):
         # test alignments offsets for simd instructions
         # alignments for vz + 2 * (vs - 1) + 1
