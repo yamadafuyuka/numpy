@@ -201,8 +201,8 @@ class _Config:
         gcc = dict(
             # native should always fail on arm and ppc64,
             # native usually works only with x86
-            native = '-march=native',
-            opt = '-O3',
+            native = '-march=native -lsleef',
+            opt = '-O3 -lsleef',
             werror = '-Werror',
         ),
         clang = dict(
@@ -523,16 +523,16 @@ class _Config:
                 implies="NEON NEON_FP16 ASIMD", autovec=True
             ),
             ASIMD = dict(
-                implies="NEON NEON_FP16 NEON_VFPV4", autovec=True
+                implies="NEON NEON_FP16 NEON_VFPV4", autovec=True, flags=" -lsleef"
             ),
             ASIMDHP = dict(
                 flags="-march=armv8.2-a+fp16"
             ),
             ASIMDDP = dict(
-                flags="-march=armv8.2-a+dotprod"
+                flags="-march=armv8.2-a+dotprod -lsleef"
             ),
             ASIMDFHM = dict(
-                flags="-march=armv8.2-a+fp16fml"
+                flags="-march=armv8.2-a+fp16fml -lsleef"
             ),
         )
         if self.cc_on_armhf and is_unix: return dict(

@@ -8,6 +8,10 @@
 #include "npy_svml.h"
 #include "fast_loop_macros.h"
 
+#if NPY_SIMD
+#include <sleef.h>
+#endif
+
 #if NPY_SIMD && defined(NPY_HAVE_AVX512_SKX) && defined(NPY_CAN_LINK_SVML)
 /**begin repeat
  * #sfx = f32, f64#
@@ -76,6 +80,9 @@ simd_@func@_f64(const double *src, npy_intp ssrc,
 /**end repeat**/
 #endif
 
+
+
+
 /**begin repeat
  *  #TYPE = DOUBLE, FLOAT#
  *  #type = npy_double, npy_float#
@@ -83,8 +90,8 @@ simd_@func@_f64(const double *src, npy_intp ssrc,
  *  #sfx  = f64, f32#
  */
 /**begin repeat1
- *  #func = exp2, log2, log10, expm1, log1p, cbrt, tan, arcsin, arccos, arctan, sinh, cosh, arcsinh, arccosh, arctanh#
- *  #intrin = exp2, log2, log10, expm1, log1p, cbrt, tan, asin, acos, atan, sinh, cosh, asinh, acosh, atanh#
+ *  #func = expm1, log1p, cbrt, tan, arcsin, arccos, arctan, sinh, cosh, arcsinh, arccosh, arctanh#
+ *  #intrin = expm1, log1p, cbrt, tan, asin, acos, atan, sinh, cosh, asinh, acosh, atanh#
  */
 NPY_NO_EXPORT void NPY_CPU_DISPATCH_CURFX(@TYPE@_@func@)
 (char **args, npy_intp const *dimensions, npy_intp const *steps, void *NPY_UNUSED(data))
@@ -139,3 +146,112 @@ NPY_NO_EXPORT void NPY_CPU_DISPATCH_CURFX(DOUBLE_@func@)
     }
 }
 /**end repeat**/
+
+/*
+----------------------------------------------------
+simd_log10_f64
+----------------------------------------------------
+*/
+//#if NPY_SIMD
+/**begin repeat
+ * #sfx = f32, f64#
+ * #func_suffix = f4, d2#
+ */
+/**begin repeat1
+ * #func = exp2, log2, log10#
+ * #default_val = 0, 1, 1#
+ */
+static void
+simd_@func@_@sfx@(const npyv_lanetype_@sfx@ *src, npy_intp ssrc,
+                        npyv_lanetype_@sfx@ *dst, npy_intp sdst, npy_intp len)
+{
+    const int vstep = npyv_nlanes_@sfx@;
+    for (; len > 0; len -= vstep, src += ssrc*vstep, dst += sdst*vstep) {
+        npyv_@sfx@ xa;
+        #if @default_val@
+            if (ssrc == 1) {
+                xa = npyv_load_till_@sfx@(src, len, @default_val@);
+            } else {
+                xa = npyv_loadn_till_@sfx@(src, ssrc, len, @default_val@);
+            }
+        #else
+            if (ssrc == 1) {
+                xa = npyv_load_tillz_@sfx@(src, len);
+            } else {
+                xa = npyv_loadn_tillz_@sfx@(src, ssrc, len);
+            }
+        #endif
+          //npyv_@sfx@ out = Sleef_log10dx_u10sve(xa);
+          //npyv_@sfx@ out = Sleef_log10d2_u10(xa);
+          npyv_@sfx@ out = Sleef_@func@@func_suffix@_u10(xa);
+          //npyv_@sfx@ out = Sleef_log10d2_u10advsimd(xa);
+        if (sdst == 1) {
+            npyv_store_till_@sfx@(dst, len, out);
+        } else {
+            npyv_storen_till_@sfx@(dst, sdst, len, out);
+        }
+    }
+    npyv_cleanup();
+}
+//#endif
+/**end repeat1**/
+/**end repeat**/
+
+
+/*  
+-----------------------
+ DOUBLE_log10_SVE
+-------------------------
+*/
+
+/**begin repeat
+ *  #TYPE = DOUBLE, FLOAT#
+ *  #type = npy_double, npy_float#
+ *  #vsub = , f#
+ *  #sfx  = f64, f32#
+ */
+/**begin repeat1
+ *  #func = exp2, log2, log10#
+ *  #intrin = exp2, log2, log10#
+ */
+NPY_NO_EXPORT void NPY_CPU_DISPATCH_CURFX(@TYPE@_@func@)
+(char **args, npy_intp const *dimensions, npy_intp const *steps, void *NPY_UNUSED(data))
+{
+#if NPY_SIMD && defined(NPY_HAVE_AVX512_SKX) && defined(NPY_CAN_LINK_SVML)
+    const @type@ *src = (@type@*)args[0];
+          @type@ *dst = (@type@*)args[1];
+    const int lsize = sizeof(src[0]);
+    const npy_intp ssrc = steps[0] / lsize;
+    const npy_intp sdst = steps[1] / lsize;
+    const npy_intp len = dimensions[0];
+    assert(len <= 1 || (steps[0] % lsize == 0 && steps[1] % lsize == 0));
+    if (!is_mem_overlap(src, steps[0], dst, steps[1], len) &&
+        npyv_loadable_stride_@sfx@(ssrc) &&
+        npyv_storable_stride_@sfx@(sdst)) {
+        simd_@intrin@_@sfx@(src, ssrc, dst, sdst, len);
+        return;
+    }
+#elif NPY_SIMD
+    const @type@ *src = (@type@*)args[0];
+          @type@ *dst = (@type@*)args[1];
+    const int lsize = sizeof(src[0]);
+    const npy_intp ssrc = steps[0] / lsize;
+    const npy_intp sdst = steps[1] / lsize;
+    const npy_intp len = dimensions[0];
+    assert(len <= 1 || (steps[0] % lsize == 0 && steps[1] % lsize == 0));
+    if (!is_mem_overlap(src, steps[0], dst, steps[1], len) &&
+        npyv_loadable_stride_@sfx@(ssrc) &&
+        npyv_storable_stride_@sfx@(sdst)) {
+        simd_@intrin@_@sfx@(src, ssrc, dst, sdst, len);
+        return;
+    }
+#endif
+    UNARY_LOOP {
+        const @type@ in1 = *(@type@ *)ip1;
+        *(@type@ *)op1 = npy_@intrin@(in1);
+    }
+}
+/**end repeat1**/
+/**end repeat**/
+
+
