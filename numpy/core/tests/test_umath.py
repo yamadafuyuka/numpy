@@ -589,7 +589,8 @@ class TestDivision:
         assert_equal(np.signbit(x//1), 0)
         assert_equal(np.signbit((-x)//1), 1)
 
-    @pytest.mark.skipif(np.__config__.get_info("blas_ssl2_info"), reason="gh-22982")
+    @pytest.mark.skipif(np.__config__.get_info("blas_ssl2_info"),
+            reason="gh-22982")
     @pytest.mark.skipif(IS_WASM, reason="fp errors don't work in wasm")
     @pytest.mark.parametrize('dtype', np.typecodes['Float'])
     def test_floor_division_errors(self, dtype):
@@ -705,7 +706,8 @@ class TestRemainder:
                     else:
                         assert_(b > rem >= 0, msg)
 
-    @pytest.mark.skipif(np.__config__.get_info("blas_ssl2_info"), reason="gh-22982")
+    @pytest.mark.skipif(np.__config__.get_info("blas_ssl2_info"),
+            reason="gh-22982")
     @pytest.mark.skipif(IS_WASM, reason="fp errors don't work in wasm")
     @pytest.mark.xfail(sys.platform.startswith("darwin"),
             reason="MacOS seems to not give the correct 'invalid' warning for "
