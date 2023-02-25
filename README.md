@@ -1,3 +1,13 @@
+# NumPy with SLEEF (ASIMD version)
+- Support functions: log2, log10, exp2
+
+## License
+
+Boost Software License, Version 1.0:
+- [SLEEF Vectorized Math Library]( https://sleef.org/)
+
+---
+
 <h1 align="center">
 <img src="/branding/logo/primary/numpylogo.svg" width="300">
 </h1><br>
