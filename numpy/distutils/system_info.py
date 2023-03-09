@@ -1334,13 +1334,15 @@ class blas_mkl_info(mkl_info):
 class ssl2_info(system_info):
     section = 'ssl2'
     dir_env_var = 'SSL2_DIR'
-    _lib_ssl2 = ['fjlapacksve']
+    #_lib_ssl2 = ['fjlapackexsve']
 
     def calc_info(self):
         lib_dirs = self.get_lib_dirs()
         incl_dirs = self.get_include_dirs()
-        ssl2_libs = self.get_libs('ssl2_libs', self._lib_ssl2)
+        #ssl2_libs = self.get_libs('ssl2_libs', self._lib_ssl2)
+        ssl2_libs = self.get_libraries()
         info = self.check_libs2(lib_dirs, ssl2_libs)
+        #info = self.check_libs2(lib_dirs, 'libraries')
         if info is None:
             return
         dict_append(info,
