@@ -33,6 +33,8 @@ builtins.__NUMPY_SETUP__ = True
 # The version components are changed from ints to strings, but only VERSION
 # seems to matter outside of this module and it was already a str.
 FULLVERSION = versioneer.get_version()
+#print(versioneer.get_version())
+#exit(0)
 
 # Capture the version string:
 # 1.22.0.dev0+ ... -> ISRELEASED == False, VERSION == 1.22.0
@@ -44,7 +46,9 @@ _V_MATCH = re.match(r'(\d+)\.(\d+)\.(\d+)', FULLVERSION)
 if _V_MATCH is None:
     raise RuntimeError(f'Cannot parse version {FULLVERSION}')
 MAJOR, MINOR, MICRO = _V_MATCH.groups()
+#MAJOR, MINOR, MICRO = 1, 24, 4
 VERSION = '{}.{}.{}'.format(MAJOR, MINOR, MICRO)
+#exit(0)
 
 # The first version not in the `Programming Language :: Python :: ...` classifiers below
 if sys.version_info >= (3, 12):

@@ -21,8 +21,13 @@ class FujitsuCCompiler(UnixCCompiler):
             ' -O3 -Nclang -fPIC',
             compiler_cxx=cxx_compiler +
             ' -O3 -Nclang -fPIC',
-            linker_exe=cc_compiler +
-            ' -lfj90i -lfj90f -lfjsrcinfo -lelf -shared',
+            linker_exe=cc_compiler
+            ,
+            #  +
+            #' -lfj90fmt_sve -lfj90i -lfjsrcinfo -lelf',
+            #' -lfj90fmt_sve -lfj90i -lfj90f -lfjsrcinfo -lelf',
             linker_so=cc_compiler +
-            ' -lfj90i -lfj90f -lfjsrcinfo -lelf -shared'
+            ' -shared'
+            #' -lfj90fmt_sve -lfj90i -lfjsrcinfo -lelf -shared'
+            #' -lfj90fmt_sve -lfj90i -lfj90f -lfjsrcinfo -lelf -shared',
             )

@@ -747,6 +747,7 @@ def configuration(parent_package='',top_path=None):
     #                     multiarray_tests module                         #
     #######################################################################
 
+    EXTRA_LIBRARIES = ['npymath', 'fj90fmt_sve', 'fj90i', 'fj90f', 'fjsrcinfo', 'elf']
     config.add_extension('_multiarray_tests',
                     sources=[join('src', 'multiarray', '_multiarray_tests.c.src'),
                              join('src', 'common', 'mem_overlap.c'),
@@ -756,7 +757,7 @@ def configuration(parent_package='',top_path=None):
                              join('src', 'common', 'npy_argparse.h'),
                              join('src', 'common', 'npy_hashtable.h'),
                              join('src', 'common', 'npy_extint128.h')],
-                    libraries=['npymath'])
+                    libraries=EXTRA_LIBRARIES)
 
     #######################################################################
     #             _multiarray_umath module - common part                  #
@@ -1064,6 +1065,11 @@ def configuration(parent_package='',top_path=None):
         # to make builds reproducible.
         svml_objs.sort()
 
+    EXTRA_LIBRARIES = ['npymath', 'fj90fmt_sve', 'fj90i', 'fj90f', 'fjsrcinfo', 'elf']
+    #if config.compiler:
+    #    # Math lib
+    #    EXTRA_LIBRARIES.append('m')
+
     config.add_extension('_multiarray_umath',
                          # Forcing C language even though we have C++ sources.
                          # It forces the C linker and don't link C++ runtime.
@@ -1081,7 +1087,7 @@ def configuration(parent_package='',top_path=None):
                                  ],
                          depends=deps + multiarray_deps + umath_deps +
                                 common_deps,
-                         libraries=['npymath'],
+                         libraries=EXTRA_LIBRARIES,
                          extra_objects=svml_objs,
                          extra_info=extra_info,
                          extra_cxx_compile_args=NPY_CXX_FLAGS)
@@ -1140,7 +1146,7 @@ def configuration(parent_package='',top_path=None):
             join('src', '_simd', '_simd_easyintrin.inc'),
             join('src', '_simd', '_simd_vector.inc'),
         ],
-        libraries=['npymath']
+        libraries=EXTRA_LIBRARIES
     )
 
     config.add_subpackage('tests')

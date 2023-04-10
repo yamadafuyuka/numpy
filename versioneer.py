@@ -1472,9 +1472,12 @@ def render_pep440(pieces):
     Exceptions:
     1: no tags. git_describe was just HEX. 0+untagged.DISTANCE.gHEX[.dirty]
     """
-    if pieces["closest-tag"]:
-        rendered = pieces["closest-tag"]
-        if pieces["distance"] or pieces["dirty"]:
+    if 1:
+    #if pieces["closest-tag"]:
+        #rendered = pieces["closest-tag"]
+        rendered = "1.99.1"
+        if 0:
+        #if pieces["distance"] or pieces["dirty"]:
             rendered += plus_or_dot(pieces)
             rendered += "%d.g%s" % (pieces["distance"], pieces["short"])
             if pieces["dirty"]:
@@ -1788,6 +1791,7 @@ def get_versions(verbose=False):
 
 def get_version():
     """Get the short version string for this project."""
+    print(get_versions())
     return get_versions()["version"]
 
 
